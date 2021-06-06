@@ -6,7 +6,7 @@ import threading
 from  wave_form import wave,default_wave
 import sounddevice as sd
 from scipy.io.wavfile import write
-from  tkinter import  messagebox
+from  tkinter import  messagebox,ttk
 import  sys
 
 def hd(win):
@@ -54,13 +54,14 @@ def hd(win):
         f=str(file)
         print(f)
         f=f.split("/")
-        f=f[-1]
-        f_name=f.replace("' mode='r' encoding='UTF-8'>","")
+        f_name=f[-1]
+        print(f_name)
+        f_name=f_name.replace("' mode='r' encoding='UTF-8'>","")
+        print(f_name)
         if len(f_name)>15:
             f_name=f_name[:-(len(f_name)-10)]+".wav"
         if file is not None:
             Output.config(text=f_name,font=("Calibri", 10))
-            #Output.insert(INSERT,f.replace("' mode='r' encoding='UTF-8'>",""))
             messagebox.showinfo("showinfo", "Uploaded Successfully")
     global wf,cancel,rec
     wf=1
@@ -74,7 +75,6 @@ def hd(win):
     #timer
     def record_audio():
         def run():
-            x=1
             global cancel, wf,rec
             rec=1
             wf=0
@@ -82,34 +82,30 @@ def hd(win):
             y=int(t_value[0]+t_value[1])-1
 
             if cancel == 1:
-                button1 = Button(c, text="X", command=cancel_record, anchor=W)
-                button1.place(relx=0.58, rely=0.005)
+                button1 = Button(win, text="X", command=cancel_record, anchor=W)
+                button1.place(relx=0.81, rely=0.2)
 
-            for i in range(0,200):
+            for i in range(0,int(t_value[0]+t_value[1])):
                 timer=y
                 if y<10:
                     timer="0"+str(y)
                 text = Label( text=("00:"+str(timer)))
-                text.place(relx=0.68, rely=0.21)
-                c.create_rectangle(20, 2, 20+i, 30, outline="#AFCAC2" ,fill="#AFCAC2")
-                c.place(relx=0.57, rely=0.2)
-                win.update_idletasks()
-                if int(x*(200/int(t_value[0]+t_value[1])))==i:
-                    x+=1
-                    y-=1
+                text.place(relx=0.65, rely=0.185)
+                if pb['value'] != 100:
+                    pb['value'] += (100 / int(t_value[0]+t_value[1]))
+                    y=y-1
                     time.sleep(1)
                 if cancel==0:
                     cancel=1
                     rec=0
+                    pb['value']=0
                     default_wave(win)
                     button1.destroy()
-                    text = Label(text=("00:00" ))
-                    text.place(relx=0.68, rely=0.21)
-                    c.create_rectangle(20, 2, 220, 30, outline="#86B9A3", fill="lightgrey")
+                    text.config(text=("00:00" ))
                     break
+            pb['value']=0
             button1.destroy()
             default_wave(win)
-            c.create_rectangle(20, 2, 220, 30, outline="#86B9A3", fill="lightgrey")
             wf=1
             if rec==1:
                 messagebox.showinfo("showinfo", "Recorded Successfully")
@@ -161,9 +157,6 @@ def hd(win):
                   width = 15,
                   bg = "light cyan")
 
-    # Output=Text(height = 1.5,
-    #               width = 15,
-    #               bg = "light cyan")
     originalImg = Image.open("microphone.png")
     resized = originalImg.resize((28, 28), Image.ANTIALIAS)
     img = ImageTk.PhotoImage(resized)
@@ -185,8 +178,17 @@ def hd(win):
     d2 = OptionMenu(win, variable1, *option)
     d2.configure(indicatoron=0, compound=RIGHT, image=imgDown, width=70)
 
-    c=Canvas()
-    c.create_rectangle(20, 2, 220, 30, outline="#86B9A3")
+    #progress_bar
+    pb = ttk.Progressbar(
+        win,
+        orient='horizontal',
+        mode='determinate',
+        length=200,
+
+    )
+    # place the progressbar
+
+    pb.place(relx=0.57, rely=0.23)
 
     #audio waveform
     text = Label( text=("Input Waveform"))
@@ -212,7 +214,6 @@ def hd(win):
     button_record.place(relx=0.53, rely=0.2)
     d1.place(relx=0.3,rely=0.2)
     d2.place(relx=0.42,rely=0.2)
-    c.place(relx=0.57,rely=0.2)
 
     # Center the Content
     win.columnconfigure(0, weight=1)
