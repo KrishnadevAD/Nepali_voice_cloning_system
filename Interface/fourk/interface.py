@@ -6,7 +6,7 @@ import threading
 from wave_form import wave, default_wave
 import sounddevice as sd
 from scipy.io.wavfile import write
-from tkinter import messagebox
+from tkinter import messagebox,ttk
 import sys
 import ctypes
 
@@ -89,57 +89,45 @@ def fourk(win):
 
     def record_audio():
         def run():
-            x = 1
             global cancel, wf, rec
             rec = 1
             wf = 0
             t_value = variable1.get()
             y = int(t_value[0]+t_value[1])-1
-
             if cancel == 1:
-                button1 = Button(c, text="X", command=cancel_record,
-                                 anchor=W, height=1, width=2)
-                button1.place(relx=0.52, rely=0.005)
+                button1 = Button(win, text="X", command=cancel_record, anchor=W)
+                button1.place(relx=0.81, rely=0.2)
 
-            for i in range(0, 400, 2):
+            for i in range(0, int(t_value[0] + t_value[1])):
                 timer = y
                 if y < 10:
-                    timer = "0"+str(y)
-                text = Label(text=("00:"+str(timer)))
-                text.place(relx=0.68, rely=0.21)
-                c.create_rectangle(
-                    20, 2, 20+i, 75, outline="#AFCAC2", fill="#AFCAC2")
-                c.place(relx=0.57, rely=0.2)
-                win.update_idletasks()
-                check = int((400/int(t_value[0]+t_value[1])))
-                if check % 2 == 1:
-                    check = check + 1
-                if check*x == i:
-                    x += 1
-                    y -= 1
-                    # time.sleep(1)
+                    timer = "0" + str(y)
+                text = Label(text=("00:" + str(timer)))
+                text.place(relx=0.65, rely=0.185)
+                if pb['value'] != 100:
+                    pb['value'] += (100 / int(t_value[0] + t_value[1]))
+                    y = y - 1
+                    time.sleep(1)
                 if cancel == 0:
                     cancel = 1
                     rec = 0
+                    pb['value'] = 0
                     default_wave(win)
                     button1.destroy()
-                    text = Label(text=("00:00"))
-                    text.place(relx=0.68, rely=0.21)
-                    c.create_rectangle(
-                        20, 2, 420, 75, outline="#86B9A3", fill="lightgrey")
+                    text.config(text=("00:00"))
                     break
+            pb['value'] = 0
             button1.destroy()
             default_wave(win)
-            c.create_rectangle(20, 2, 420, 75, outline="#86B9A3", fill="lightgrey")
             wf = 1
             if rec == 1:
                 messagebox.showinfo("showinfo", "Recorded Successfully")
 
         def run1():
-            global wf, cancel, rec
+            global wf, cancel
 
-            if wf == 0:
-                wave(win, cancel, rec)
+            if wf == 0 and cancel == 1:
+                wave(win)
 
         def record():
             global rec
@@ -149,7 +137,7 @@ def fourk(win):
             myrecording = sd.rec(int(seconds * fs), samplerate=fs, channels=2)
             sd.wait()  # Wait until recording is finished
             if rec == 1:
-                write('output2.wav', fs, myrecording)
+                write('output1.wav', fs, myrecording)
 
         t1 = threading.Thread(target=record)
         t1.daemon = True
@@ -208,8 +196,17 @@ def fourk(win):
     d2.configure(indicatoron=0, compound=RIGHT,
                  image=imgDown, width=120, height=60)
 
-    c = Canvas()
-    c.create_rectangle(20, 2, 420, 75, outline="#86B9A3")
+    # progress_bar
+    pb = ttk.Progressbar(
+        win,
+        orient='horizontal',
+        mode='determinate',
+        length=200,
+
+    )
+    # place the progressbar
+
+    pb.place(relx=0.57, rely=0.23)
 
     # audio waveform
     text = Label(text=("Input Waveform"))
@@ -235,7 +232,6 @@ def fourk(win):
     button_record.place(relx=0.53, rely=0.2)
     d1.place(relx=0.3, rely=0.2)
     d2.place(relx=0.42, rely=0.2)
-    c.place(relx=0.57, rely=0.2)
 
     # Center the Content
     win.columnconfigure(0, weight=1)
