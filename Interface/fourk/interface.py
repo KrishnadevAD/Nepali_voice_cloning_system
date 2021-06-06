@@ -127,7 +127,7 @@ def fourk(win):
             global wf, cancel
 
             if wf == 0 and cancel == 1:
-                wave(win)
+                wave(win,cancel,rec)
 
         def record():
             global rec
