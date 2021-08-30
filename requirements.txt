@@ -1,0 +1,8 @@
+visdom
+Unidecode
+inflect
+PyQt5
+numba
+librosa
+webrtcvad
+
