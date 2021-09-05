@@ -56,7 +56,7 @@ def hd(win,given_text,f_path):
             sys.exit("exit")
 
 
-    #import audio file
+    #import audio file and fetch audio data
     def import_file():
         global file_path,f_name
         file = askopenfile(filetypes=[("Audio Files", ".wav .ogg .mp3 ")])
